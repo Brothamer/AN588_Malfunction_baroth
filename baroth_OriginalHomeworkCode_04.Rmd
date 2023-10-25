@@ -1,0 +1,169 @@
+---
+title: "baroth_OriginalHomeworkCode_04"
+author: "Brooke Rothamer"
+date: "2023-10-25"
+output:
+  prettydoc::html_pretty:
+    theme: "tactile"
+    toc: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Part 1
+Write a simple R function, Z.prop.test(), that can perform one- or two-sample Z-tests for **proportion data**, using the following guidelines:
+
+* Your function should take the following arguments: p1 and n1 (no default) representing the estimated proportion and sample size (i.e., based on your sample data); p2 and n2 (both defaulting to NULL) that contain a second sample’s proportion and sample size data in the event of a two-sample test; p0 (no default) as the expected value for the population proportion; and alternative (default “two.sided”) and conf.level (default 0.95), to be used in the same way as in the function t.test().
+* When conducting a two-sample test, it should be p1 that is tested as being smaller or larger than p2 when alternative=“less” or alternative=“greater”, the same as in the use of x and y in the function t.test().
+* The function should perform a one-sample Z-test using p1, n1, and p0 if either p2 or n2 (or both) is NULL.
+* The function should contain a check for the rules of thumb we have talked about (n∗p>5 and n∗(1−p)>5) to ensure the validity of assuming the normal distribution in both the one- and two-sample settings. If this is violated, the function should still complete but it should also print an appropriate warning message.
+* The function should return a list containing the members Z (the test statistic), P (the appropriate p value), and CI (the two-sided CI with respect to “conf.level” around p1 in the case of a one-sample test and around p2-p1 in the case of a two-sample test). For all test alternatives (“two.sided”, “greater”, “less”), calculate symmetric CIs based on quantiles of the normal distribution rather than worrying about calculating single-limit confidence bounds.
+
+```{r function using normal distribution}
+
+Z.prop.test <- function(p1, n1, p2=NULL, n2=NULL, p0, alternative = "two.sided", conf.level=0.95) {
+  
+      if (is.null(p2)|is.null(n2)) { 
+        #One Sample: this option will only run if p2 or n2 (or both) are NULL
+            Z <- (p1 - p0)/(sqrt(p0*(1 - p0)/n1))
+          if (alternative == "less") { #This option will run a one-tailed test to see if p1 is less than p2
+          P <- pnorm(Z, lower.tail = TRUE) 
+          }
+          if (alternative == "greater") { #This option will run a one-tailed test to see if p1 is greater than p2
+          P <- pnorm(Z, lower.tail = FALSE)
+          }
+          if (alternative == "two.sided") { #This option will run a two-tailed test (default) to see if p1 differs from p2
+            if (Z > 0) #if Z is greater than 0, we need to look at the probability above the Z score
+                {
+                  P <- 2 * pnorm(Z, lower.tail = FALSE) #multiple by 2 to account for probability of being above or below the expected proportion
+                }
+            if (Z < 0) #if Z is greater than 0, we need to look at the probability up to (below) the Z score
+                {
+                  P <- 2 * pnorm(Z, lower.tail = TRUE)
+                }
+            }
+          lower <- p1 - qnorm(1-((1-conf.level)/2)) * sqrt(p1 * (1 - p1)/n1) #1-((1-conf.level)/2) because half the confidence interval is above
+          upper <- p1 + qnorm(1-((1-conf.level)/2)) * sqrt(p1 * (1 - p1)/n1) #and half is below
+          CI <- c(lower, upper)
+          CI
+          if (n1*p0 < 5 | n1*(1-p0) < 5) 
+            {print("Warning: Test may violate the assumptions of the normal distribution. n is not sufficiently large or p0 is close to 1 or 0.")} 
+          #prints a warning message is the assumptions of a normal distribution are not met
+        }
+  
+      else{ 
+        # Two Sample: this option will run if p2 and n2 are provided
+          ppool <- ((p1+p2)/(n1+n2)) #calculate pooled proportion of the two samples for use in calculating z score
+          Z <- (p2 - p1 - p0)/sqrt(ppool*(1-ppool)*((1/n1)+(1/n2)))
+    
+          if (alternative == "less") { #This option will run a one-tailed test to see if p2-p1 is less than 0
+            P <- 1 - pnorm(Z, lower.tail = TRUE) + pnorm(Z, lower.tail = FALSE)
+          }
+   
+          if (alternative == "greater") { #This option will run a one-tailed test to see if p2-p1 is greater than 0
+            P <- 1 - pnorm(Z, lower.tail = TRUE) + pnorm(Z, lower.tail = FALSE)
+          }
+    
+          if (alternative == "two.sided") { #This option will run a two-tailed test (default) to see if p2-p1 differs from 0
+            P <- 1 - pnorm(Z, lower.tail = TRUE) + pnorm(Z, lower.tail = FALSE)
+          }
+          lower <- (p2-p1) - qnorm(1-((1-conf.level)/2)) * sqrt((p1*(1-p1)/n1) + (p2*(1-p2)/n2)) #I am not entirely sure I calculated SE correctly for a two sample test
+          upper <- (p2-p1) + qnorm(1-((1-conf.level)/2)) * sqrt((p1*(1-p1)/n1) + (p2*(1-p2)/n2))
+          CI <- c(lower, upper)
+          CI
+          if (n1*p1 < 5 | n1*(1-p1) < 5 | n2*p2 < 5 | n2*(1-p2) < 5) 
+            {print("Warning: Test may violate the assumptions of the normal distribution. n is not sufficiently large or p is close to 1 or 0.")} 
+          #I'm not sure I've expressed the rule correctly here
+      }
+      
+    return_list <- list(Z, P, CI) # make a list of the items the function should return
+    names(return_list) <- c("Z statistic", "p-value", "Confidence Interval") # labels items in the output
+    return(return_list) #tell the function to return that list
+    }
+```
+
+Does it work on these sample descriptions?
+```{r does it work}
+#A Single Sample test of the function
+Z.prop.test(p1=0.5, n1=36, p0=0.9, alternative = "two.sided", conf.level=0.95)
+```
+```{r does it work 2}
+#A Two Sample test of the function
+Z.prop.test(p1=0.75, n1=36, p2=0.8, n2=50, p0=0, alternative = "two.sided", conf.level=0.95)
+```
+A version of the same function using t-distributions of Z scores instead of normal distributions so account for small sample size.
+```{r function using t distribution}
+
+Z.prop.test.t <- function(p1, n1, p2=NULL, n2=NULL, p0, alternative = "two.sided", conf.level=0.95) {
+  
+      if (is.null(p2)|is.null(n2)) { 
+            Z <- (p1 - p0)/(sqrt(p0*(1 - p0)/n1))
+          if (alternative == "less") { 
+          P <- pt(Z, df = n1 - 1, lower.tail = TRUE) #using the t-distribution, pt(), not normal distribution, pnorm(), because its better for small sample sizes
+          }
+          if (alternative == "greater") { 
+          P <- pt(Z, df = n1 - 1, lower.tail = FALSE)
+          }
+          if (alternative == "two.sided") { 
+            if (Z > 0) 
+                {
+                  P <- 2 * pt(Z, df = n1 - 1, lower.tail = FALSE) 
+                }
+            if (Z < 0) 
+                {
+                  P <- 2 * pt(Z, df = n1 - 1, lower.tail = TRUE)
+                }
+            }
+          lower <- p1 - qt(df = n1-1, 1-((1-conf.level)/2)) * sqrt(p1 * (1 - p1)/n1) 
+          upper <- p1 + qt(df = n1-1, 1-((1-conf.level)/2)) * sqrt(p1 * (1 - p1)/n1) 
+          CI <- c(lower, upper)
+          CI
+          }
+      else{ 
+          ppool <- ((p1+p2)/(n1+n2))
+          Z <- (p2 - p1 - p0)/sqrt(ppool*(1-ppool)*((1/n1)+(1/n2)))
+    
+          if (alternative == "less") { 
+            P <- 1 - pt(Z, df = n1 - 1, lower.tail = TRUE) + pnorm(Z, lower.tail = FALSE)
+          }
+   
+          if (alternative == "greater") { 
+            P <- 1 - pt(Z, df = n1 - 1, lower.tail = TRUE) + pnorm(Z, lower.tail = FALSE)
+          }
+    
+          if (alternative == "two.sided") { 
+            P <- 1 - pt(Z, df = n1 - 1, lower.tail = TRUE) + pnorm(Z, lower.tail = FALSE)
+          }
+          lower <- (p2-p1) - qt(df = n1-1, 1-((1-conf.level)/2)) * sqrt((p1*(1-p1)/n1) + (p2*(1-p2)/n2))
+          upper <- (p2-p1) + qt(df = n1-1, 1-((1-conf.level)/2)) * sqrt((p1*(1-p1)/n1) + (p2*(1-p2)/n2))
+          CI <- c(lower, upper)
+          CI
+      }
+    return_list <- list(Z, P, CI) 
+    names(return_list) <- c("Z statistic", "p-value", "Confidence Interval")  
+    return(return_list) 
+    }
+```
+
+Does it work on those same sample descriptions?
+```{r does it work 3}
+#A Single Sample test of the function
+Z.prop.test.t(p1=0.5, n1=36, p0=0.9, alternative = "two.sided", conf.level=0.95)
+```
+```{r does it work 4}
+#A Two Sample test of the function
+Z.prop.test.t(p1=0.75, n1=36, p2=0.8, n2=50, p0=0, alternative = "two.sided", conf.level=0.95)
+```
+Yes it does, and it gives very similar results except the p value given by the t distribution method is higher and the confidence intervals are a little broader than those prouced from the normal distribution method.
+
+
+# Part 2
+The dataset from Kamilar and Cooper has in it a large number of variables related to life history and body size. For this exercise, the end aim is to fit a simple linear regression model to predict longevity (MaxLongevity_m) measured in months from species’ brain size (Brain_Size_Species_Mean) measured in grams. Do the following for both longevity~brain size and log(longevity)~log(brain size):
+
+* Fit the regression model and, using {ggplot2}, produce a scatterplot with the fitted line superimposed upon the data. Append the the fitted model equation to your plot (HINT: use the function geom_text()).
+* Identify and interpret the point estimate of the slope (β1), as well as the outcome of the test associated with the hypotheses H0: β1 = 0; HA: β1 ≠ 0. Also, find a 90 percent CI for the slope (β1) parameter.
+* Using your model, add lines for the 90 percent confidence and prediction interval bands on the plot and add a legend to differentiate between the lines.
+* Produce a point estimate and associated 90 percent PI for the longevity of a species whose brain weight is 800 gm. Do you trust the model to predict observations accurately for this value of the explanatory variable? Why or why not?
+* Looking at your two models, which do you think is better? Why?
