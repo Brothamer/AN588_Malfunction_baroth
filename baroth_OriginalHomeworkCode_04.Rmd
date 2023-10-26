@@ -21,6 +21,7 @@ Write a simple R function, Z.prop.test(), that can perform one- or two-sample Z-
 * The function should contain a check for the rules of thumb we have talked about (n∗p>5 and n∗(1−p)>5) to ensure the validity of assuming the normal distribution in both the one- and two-sample settings. If this is violated, the function should still complete but it should also print an appropriate warning message.
 * The function should return a list containing the members Z (the test statistic), P (the appropriate p value), and CI (the two-sided CI with respect to “conf.level” around p1 in the case of a one-sample test and around p2-p1 in the case of a two-sample test). For all test alternatives (“two.sided”, “greater”, “less”), calculate symmetric CIs based on quantiles of the normal distribution rather than worrying about calculating single-limit confidence bounds.
 
+## Z.prop.test
 ```{r function using normal distribution}
 
 Z.prop.test <- function(p1, n1, p2=NULL, n2=NULL, p0, alternative = "two.sided", conf.level=0.95) {
@@ -41,7 +42,7 @@ Z.prop.test <- function(p1, n1, p2=NULL, n2=NULL, p0, alternative = "two.sided",
                 }
             if (Z < 0) #if Z is greater than 0, we need to look at the probability up to (below) the Z score
                 {
-                  P <- 2 * pnorm(Z, lower.tail = TRUE)
+                  P <- 2 * pnorm(Z, lower.tail = TRUE) #times 2 because its 2-tailed
                 }
             }
           lower <- p1 - qnorm(1-((1-conf.level)/2)) * sqrt(p1 * (1 - p1)/n1) #1-((1-conf.level)/2) because half the confidence interval is above
@@ -59,11 +60,11 @@ Z.prop.test <- function(p1, n1, p2=NULL, n2=NULL, p0, alternative = "two.sided",
           Z <- (p2 - p1 - p0)/sqrt(ppool*(1-ppool)*((1/n1)+(1/n2)))
     
           if (alternative == "less") { #This option will run a one-tailed test to see if p2-p1 is less than 0
-            P <- 1 - pnorm(Z, lower.tail = TRUE) + pnorm(Z, lower.tail = FALSE)
+            P <- pnorm(z, lower.tail = TRUE)
           }
    
           if (alternative == "greater") { #This option will run a one-tailed test to see if p2-p1 is greater than 0
-            P <- 1 - pnorm(Z, lower.tail = TRUE) + pnorm(Z, lower.tail = FALSE)
+            P <- pnorm(Z, lower.tail = FALSE)
           }
     
           if (alternative == "two.sided") { #This option will run a two-tailed test (default) to see if p2-p1 differs from 0
@@ -93,7 +94,8 @@ Z.prop.test(p1=0.5, n1=36, p0=0.9, alternative = "two.sided", conf.level=0.95)
 #A Two Sample test of the function
 Z.prop.test(p1=0.75, n1=36, p2=0.8, n2=50, p0=0, alternative = "two.sided", conf.level=0.95)
 ```
-A version of the same function using t-distributions of Z scores instead of normal distributions so account for small sample size.
+## Z.prop.test.t (using a t distribution)
+An attempt at a version of the same function using t-distributions of Z scores instead of normal distributions so account for small sample size.
 ```{r function using t distribution}
 
 Z.prop.test.t <- function(p1, n1, p2=NULL, n2=NULL, p0, alternative = "two.sided", conf.level=0.95) {
@@ -126,15 +128,15 @@ Z.prop.test.t <- function(p1, n1, p2=NULL, n2=NULL, p0, alternative = "two.sided
           Z <- (p2 - p1 - p0)/sqrt(ppool*(1-ppool)*((1/n1)+(1/n2)))
     
           if (alternative == "less") { 
-            P <- 1 - pt(Z, df = n1 - 1, lower.tail = TRUE) + pnorm(Z, lower.tail = FALSE)
+            P <- pt(Z, df = n1 - 1, lower.tail = TRUE)
           }
    
           if (alternative == "greater") { 
-            P <- 1 - pt(Z, df = n1 - 1, lower.tail = TRUE) + pnorm(Z, lower.tail = FALSE)
+            P <- pt(Z, df = n1 - 1, lower.tail = FALSE)
           }
     
           if (alternative == "two.sided") { 
-            P <- 1 - pt(Z, df = n1 - 1, lower.tail = TRUE) + pnorm(Z, lower.tail = FALSE)
+            P <- 1 - pt(Z, df = n1 - 1, lower.tail = TRUE) + pt(Z, df = n1 - 1, lower.tail = FALSE)
           }
           lower <- (p2-p1) - qt(df = n1-1, 1-((1-conf.level)/2)) * sqrt((p1*(1-p1)/n1) + (p2*(1-p2)/n2))
           upper <- (p2-p1) + qt(df = n1-1, 1-((1-conf.level)/2)) * sqrt((p1*(1-p1)/n1) + (p2*(1-p2)/n2))
@@ -167,7 +169,9 @@ data <- read.csv("https://raw.githubusercontent.com/fuzzyatelin/fuzzyatelin.gith
 head(data)
 ```
 
-## Fit the regression model and, using {ggplot2}, produce a scatterplot with the fitted line superimposed upon the data. Append the the fitted model equation to your plot (HINT: use the function geom_text()).
+## Regression models and plotting
+
+Fit the regression model and, using {ggplot2}, produce a scatterplot with the fitted line superimposed upon the data. Append the the fitted model equation to your plot (HINT: use the function geom_text()).
 
 ```{r preparation, warning=FALSE}
 library(ggplot2)
@@ -177,10 +181,10 @@ brainsize <- data$Brain_Size_Species_Mean
 log_brainsize <- log(data$Brain_Size_Species_Mean)
 ```
 
-longevity~brain size
+### longevity~brain size
 ```{r fit the model, warning=FALSE}
 model1 <- lm(longevity ~ brainsize, data = data)
-model1
+summary(model1)
 
 plot1 <- ggplot(data = data, aes(x = brainsize, y = longevity)) + 
   geom_point() +
@@ -190,23 +194,142 @@ plot1 <- ggplot(data = data, aes(x = brainsize, y = longevity)) +
 plot1
 ```
 
-log(longevity)~log(brain size)
+### log(longevity)~log(brain size)
 ```{r fit the  log model, warning=FALSE}
 model2 <- lm(log_longevity ~ log_brainsize, data = data)
-model2
+summary(model2)
 
 plot2 <- ggplot(data = data, aes(x = log_brainsize, y = log_longevity)) +
   geom_point() +
   geom_smooth(method = "lm", formula = y ~ x, color="blue") +
-  geom_text(x=300, y=300, label="y = 0.2341x + 4.8790", color="blue") +
+  geom_text(x=4, y=5, label="y = 0.2341x + 4.8790", color="blue") +
   theme_classic()
 plot2
 ```
 
-* Identify and interpret the point estimate of the slope (β1), as well as the outcome of the test associated with the hypotheses H0: β1 = 0; HA: β1 ≠ 0. Also, find a 90 percent CI for the slope (β1) parameter.
+## Slope testing
 
-* Using your model, add lines for the 90 percent confidence and prediction interval bands on the plot and add a legend to differentiate between the lines.
+Identify and interpret the point estimate of the slope (β1), as well as the outcome of the test associated with the hypotheses H0: β1 = 0; HA: β1 ≠ 0. Also, find a 90 percent CI for the slope (β1) parameter.
 
-* Produce a point estimate and associated 90 percent PI for the longevity of a species whose brain weight is 800 gm. Do you trust the model to predict observations accurately for this value of the explanatory variable? Why or why not?
+### longevity~brain size
 
-* Looking at your two models, which do you think is better? Why?
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept) 248.9523    11.1111   22.41   <2e-16 ***
+brainsize     1.2180     0.1101   11.06   <2e-16 ***
+
+The slope (β1) of longevity~brain size is 1.218 meaning that for every gram species mean brain size increases, the maximum longevity increases by 1.218 months. The p-value of the test that the slope differs from 0, <2e-16, is less than 0.05, indicates that the slope is not equal to 0.
+
+```{r confidence interval}
+lower <- 1.2180 - qt(0.95, df = 211) * 0.1101 #213 observations - 2 = 211 df
+upper <- 1.2180 + qt(0.95, df = 211) * 0.1101 #1-.9 confidence - .1 divided between the lower and upper calculations
+ci <- c(lower, upper)
+ci
+```
+With 90% confidence, we can say that the actual slope of the relationship is between 1.036103 and 1.399897.
+
+### log(longevity)~log(brain size)
+Coefficients (log):
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept)    4.87895    0.06907   70.63   <2e-16 ***
+log_brainsize  0.23415    0.01781   13.15   <2e-16 ***
+
+The slope (β1) of log(longevity)~log(brain size) is 0.2341 meaning that for every unit increase in the logarithm of species mean brain size increases, the logarithm of maximum longevity increases by 1.218 units. The p-value of the test that the slope differs from 0, <2e-16, is less than 0.05, indicates that the slope is not equal to 0.
+
+```{r confidence interval log}
+lower <- 0.23415 - qt(0.95, df = 211) * 0.01781
+upper <- 0.23415 + qt(0.95, df = 211) * 0.01781
+ci <- c(lower, upper)
+ci
+```
+With 90% confidence, we can say that the actual slope of the relationship is between 0.204726 and 0.263574.
+
+
+## Confidence intervals and prediction intervals
+
+Using your model, add lines for the 90 percent confidence and prediction interval bands on the plot and add a legend to differentiate between the lines.
+
+### longevity~brain size
+```{r confidence intervals}
+ci1 <- predict(model1, newdata = data.frame(brainsize = data$Brain_Size_Species_Mean), interval = "confidence", level = 0.90)  # to calculate confidence intervals for a vector of values
+
+pi1 <- predict(model1, newdata = data.frame(brainsize = data$Brain_Size_Species_Mean), interval = "prediction", level = 0.90)  # to calculate prediction intervals for a vector of values
+
+df1 <- as.data.frame(cbind(brainsize ,longevity, ci1, pi1)) #make a data frame of the x and y values and the newly calculated confidence intervals
+names(df1) <- c("brainsize", "longevity", "CIfit", "CIlwr", "CIupr", "PIfit", "PIlwr",
+    "PIupr")
+head(df1)
+```
+
+```{r confidence and prediction bands, warning=FALSE}
+plot1 <- ggplot(data = df1, aes(x = brainsize, y = longevity)) + 
+  geom_point() +
+  geom_text(x=300, y=300, label="y = 1.218x + 248.952") +
+  theme_classic() +
+  geom_line(aes(x = brainsize, y = CIfit, color="Model")) +
+  geom_line(aes(x = brainsize, y = CIlwr, color="CI")) +
+  geom_line(aes(x = brainsize, y = CIupr, color="CI")) +
+  geom_line(aes(x = brainsize, y = PIlwr, color="PI")) +
+  geom_line(aes(x = brainsize, y = PIupr, color="PI")) +
+  theme(legend.title=element_blank())
+plot1
+```
+
+### log(longevity)~log(brain size)
+```{r confidence intervals log}
+ci2 <- predict(model2, newdata = data.frame(log_longevity = log(data$MaxLongevity_m)), interval = "confidence", level = 0.90)  # to calculate confidence intervals for a vector of values
+pi2 <- predict(model2, newdata = data.frame(log_brainsize = log(data$Brain_Size_Species_Mean)), interval = "prediction", level = 0.90)  # to calculate prediction intervals for a vector of values
+
+df2 <- as.data.frame(cbind(log_brainsize, log_longevity, ci2, pi2)) #make a data frame of the x and y values and the newly calculated confidence intervals
+names(df2) <- c("log_brainsize", "log_longevity", "CIfit", "CIlwr", "CIupr", "PIfit", "PIlwr", "PIupr")
+head(df2)
+```
+
+```{r confidence and prediction bands log, warning=FALSE}
+plot2 <- ggplot(data = df2, aes(x = log_brainsize, y = log_longevity)) + 
+  geom_point() +
+  geom_text(x=300, y=300, label="y = 0.2341x + 4.8790") +
+  theme_classic() +
+  geom_line(aes(x = log_brainsize, y = CIfit, color="Model")) +
+  geom_line(aes(x = log_brainsize, y = CIlwr, color="CI")) +
+  geom_line(aes(x = log_brainsize, y = CIupr, color="CI")) +
+  geom_line(aes(x = log_brainsize, y = PIlwr, color="PI")) +
+  geom_line(aes(x = log_brainsize, y = PIupr, color="PI")) +
+  theme(legend.title=element_blank())
+plot2
+```
+
+## Prediction
+Produce a point estimate and associated 90 percent PI for the longevity of a species whose brain weight is 800 gm. Do you trust the model to predict observations accurately for this value of the explanatory variable? Why or why not?
+
+### longevity~brain size
+```{r predict 800gm}
+longevity800 <- 1.218*(800) + 248.952
+longevity800
+
+pi800 <- predict(model1, newdata = data.frame(brainsize = 800), interval = "prediction", level = 0.90)
+pi800
+```
+The predicted longevity is 1223.352 months (~101 years) with a prediction interval of 1021.805 to 1424.884. I do not think the model can predict very accurately for an 800g average brain size because this is pretty far from most of the data. Most species have a brain size below 200g.
+
+### log(longevity)~log(brain size)
+```{r predict 800gm log}
+log(800)
+log_longevity800 <- exp(0.2341 * log(800) + 4.8790)
+log_longevity800
+
+log_pi800 <- exp(predict(model2, newdata = data.frame(log_brainsize = log(800)), interval = "prediction", level = 0.90))
+log_pi800
+```
+The predicted longevity is 628.8342 months (~52 years) with a prediction interval of 412.1652 to 959.9446. I think this model gives a more accurate prediction for an 800g average brain size than the untransformed model because log(800)=6.684612 is closer the spread of the data. Also the confidence intervals for the model are tighter, suggesting that the log model is a better fit for the data than the untransformed model.
+
+## Model Comparison
+Looking at your two models, which do you think is better? Why?
+
+I think the log model is more appropriate for for this data. The F statistic for this model is 172.9 which is higher than the F statistic for the untransformed model which is 122.4. I'm not sure, but I think this means that the residuals are relatively smaller for the log model than the untransformed model and therefore the linear model fits the data more closely. The F statistic is a better comparison than the r-squared value because it is a formal test of whether the models differ from there being no relationship.
+
+
+# Challenges I Faced
+1. I was having a hard time figuring out what was wrong with my function when it seemed to run without an error but only produced 0s in the output. I realized that I needed the else(){} function to complement the first if(){} so  that it would know what to do if the conditions of the if where not met. Understanding syntax in general was a challenge.
+2. I am still unsure if I have set the function to correctly calculate confidence interval or follow the rule of thumb to produce a warning for the two sample tests.
+3. It took me a while to figure out how to add a legend to the scatterplots because I had set the color of each line manually. When I figured out that I could set the color to a character variable, I learned that ggplot would produce a legend automatically.

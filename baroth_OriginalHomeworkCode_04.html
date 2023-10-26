@@ -152,14 +152,45 @@ pointer-events: auto;
 
 <div id="TOC" class="toc">
 <ul>
-<li><a href="#part-1" id="toc-part-1">Part 1</a></li>
+<li><a href="#part-1" id="toc-part-1">Part 1</a>
+<ul>
+<li><a href="#z.prop.test" id="toc-z.prop.test">Z.prop.test</a></li>
+<li><a href="#z.prop.test.t-using-a-t-distribution" id="toc-z.prop.test.t-using-a-t-distribution">Z.prop.test.t (using a t
+distribution)</a></li>
+</ul></li>
 <li><a href="#part-2" id="toc-part-2">Part 2</a>
 <ul>
-<li><a href="#fit-the-regression-model-and-using-ggplot2-produce-a-scatterplot-with-the-fitted-line-superimposed-upon-the-data.-append-the-the-fitted-model-equation-to-your-plot-hint-use-the-function-geom_text." id="toc-fit-the-regression-model-and-using-ggplot2-produce-a-scatterplot-with-the-fitted-line-superimposed-upon-the-data.-append-the-the-fitted-model-equation-to-your-plot-hint-use-the-function-geom_text.">Fit
-the regression model and, using {ggplot2}, produce a scatterplot with
-the fitted line superimposed upon the data. Append the the fitted model
-equation to your plot (HINT: use the function geom_text()).</a></li>
+<li><a href="#regression-models-and-plotting" id="toc-regression-models-and-plotting">Regression models and
+plotting</a>
+<ul>
+<li><a href="#longevitybrain-size" id="toc-longevitybrain-size">longevity~brain size</a></li>
+<li><a href="#loglongevitylogbrain-size" id="toc-loglongevitylogbrain-size">log(longevity)~log(brain
+size)</a></li>
 </ul></li>
+<li><a href="#slope-testing" id="toc-slope-testing">Slope testing</a>
+<ul>
+<li><a href="#longevitybrain-size-1" id="toc-longevitybrain-size-1">longevity~brain size</a></li>
+<li><a href="#loglongevitylogbrain-size-1" id="toc-loglongevitylogbrain-size-1">log(longevity)~log(brain
+size)</a></li>
+</ul></li>
+<li><a href="#confidence-intervals-and-prediction-intervals" id="toc-confidence-intervals-and-prediction-intervals">Confidence
+intervals and prediction intervals</a>
+<ul>
+<li><a href="#longevitybrain-size-2" id="toc-longevitybrain-size-2">longevity~brain size</a></li>
+<li><a href="#loglongevitylogbrain-size-2" id="toc-loglongevitylogbrain-size-2">log(longevity)~log(brain
+size)</a></li>
+</ul></li>
+<li><a href="#prediction" id="toc-prediction">Prediction</a>
+<ul>
+<li><a href="#longevitybrain-size-3" id="toc-longevitybrain-size-3">longevity~brain size</a></li>
+<li><a href="#loglongevitylogbrain-size-3" id="toc-loglongevitylogbrain-size-3">log(longevity)~log(brain
+size)</a></li>
+</ul></li>
+<li><a href="#model-comparison" id="toc-model-comparison">Model
+Comparison</a></li>
+</ul></li>
+<li><a href="#challenges-i-faced" id="toc-challenges-i-faced">Challenges
+I Faced</a></li>
 </ul>
 </div>
 
@@ -196,6 +227,8 @@ alternatives (“two.sided”, “greater”, “less”), calculate symmetric C
 based on quantiles of the normal distribution rather than worrying about
 calculating single-limit confidence bounds.</li>
 </ul>
+<div id="z.prop.test" class="section level2">
+<h2>Z.prop.test</h2>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>Z.prop.test <span class="ot">&lt;-</span> <span class="cf">function</span>(p1, n1, <span class="at">p2=</span><span class="cn">NULL</span>, <span class="at">n2=</span><span class="cn">NULL</span>, p0, <span class="at">alternative =</span> <span class="st">&quot;two.sided&quot;</span>, <span class="at">conf.level=</span><span class="fl">0.95</span>) {</span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>  </span>
 <span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>      <span class="cf">if</span> (<span class="fu">is.null</span>(p2)<span class="sc">|</span><span class="fu">is.null</span>(n2)) { </span>
@@ -214,7 +247,7 @@ calculating single-limit confidence bounds.</li>
 <span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a>                }</span>
 <span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a>            <span class="cf">if</span> (Z <span class="sc">&lt;</span> <span class="dv">0</span>) <span class="co">#if Z is greater than 0, we need to look at the probability up to (below) the Z score</span></span>
 <span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a>                {</span>
-<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a>                  P <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">pnorm</span>(Z, <span class="at">lower.tail =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a>                  P <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">pnorm</span>(Z, <span class="at">lower.tail =</span> <span class="cn">TRUE</span>) <span class="co">#times 2 because its 2-tailed</span></span>
 <span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a>                }</span>
 <span id="cb1-21"><a href="#cb1-21" tabindex="-1"></a>            }</span>
 <span id="cb1-22"><a href="#cb1-22" tabindex="-1"></a>          lower <span class="ot">&lt;-</span> p1 <span class="sc">-</span> <span class="fu">qnorm</span>(<span class="dv">1</span><span class="sc">-</span>((<span class="dv">1</span><span class="sc">-</span>conf.level)<span class="sc">/</span><span class="dv">2</span>)) <span class="sc">*</span> <span class="fu">sqrt</span>(p1 <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> p1)<span class="sc">/</span>n1) <span class="co">#1-((1-conf.level)/2) because half the confidence interval is above</span></span>
@@ -232,11 +265,11 @@ calculating single-limit confidence bounds.</li>
 <span id="cb1-34"><a href="#cb1-34" tabindex="-1"></a>          Z <span class="ot">&lt;-</span> (p2 <span class="sc">-</span> p1 <span class="sc">-</span> p0)<span class="sc">/</span><span class="fu">sqrt</span>(ppool<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>ppool)<span class="sc">*</span>((<span class="dv">1</span><span class="sc">/</span>n1)<span class="sc">+</span>(<span class="dv">1</span><span class="sc">/</span>n2)))</span>
 <span id="cb1-35"><a href="#cb1-35" tabindex="-1"></a>    </span>
 <span id="cb1-36"><a href="#cb1-36" tabindex="-1"></a>          <span class="cf">if</span> (alternative <span class="sc">==</span> <span class="st">&quot;less&quot;</span>) { <span class="co">#This option will run a one-tailed test to see if p2-p1 is less than 0</span></span>
-<span id="cb1-37"><a href="#cb1-37" tabindex="-1"></a>            P <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">pnorm</span>(Z, <span class="at">lower.tail =</span> <span class="cn">TRUE</span>) <span class="sc">+</span> <span class="fu">pnorm</span>(Z, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb1-37"><a href="#cb1-37" tabindex="-1"></a>            P <span class="ot">&lt;-</span> <span class="fu">pnorm</span>(z, <span class="at">lower.tail =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb1-38"><a href="#cb1-38" tabindex="-1"></a>          }</span>
 <span id="cb1-39"><a href="#cb1-39" tabindex="-1"></a>   </span>
 <span id="cb1-40"><a href="#cb1-40" tabindex="-1"></a>          <span class="cf">if</span> (alternative <span class="sc">==</span> <span class="st">&quot;greater&quot;</span>) { <span class="co">#This option will run a one-tailed test to see if p2-p1 is greater than 0</span></span>
-<span id="cb1-41"><a href="#cb1-41" tabindex="-1"></a>            P <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">pnorm</span>(Z, <span class="at">lower.tail =</span> <span class="cn">TRUE</span>) <span class="sc">+</span> <span class="fu">pnorm</span>(Z, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb1-41"><a href="#cb1-41" tabindex="-1"></a>            P <span class="ot">&lt;-</span> <span class="fu">pnorm</span>(Z, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>)</span>
 <span id="cb1-42"><a href="#cb1-42" tabindex="-1"></a>          }</span>
 <span id="cb1-43"><a href="#cb1-43" tabindex="-1"></a>    </span>
 <span id="cb1-44"><a href="#cb1-44" tabindex="-1"></a>          <span class="cf">if</span> (alternative <span class="sc">==</span> <span class="st">&quot;two.sided&quot;</span>) { <span class="co">#This option will run a two-tailed test (default) to see if p2-p1 differs from 0</span></span>
@@ -277,8 +310,12 @@ calculating single-limit confidence bounds.</li>
 ## 
 ## $`Confidence Interval`
 ## [1] -0.1297227  0.2297227</code></pre>
-<p>A version of the same function using t-distributions of Z scores
-instead of normal distributions so account for small sample size.</p>
+</div>
+<div id="z.prop.test.t-using-a-t-distribution" class="section level2">
+<h2>Z.prop.test.t (using a t distribution)</h2>
+<p>An attempt at a version of the same function using t-distributions of
+Z scores instead of normal distributions so account for small sample
+size.</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>Z.prop.test.t <span class="ot">&lt;-</span> <span class="cf">function</span>(p1, n1, <span class="at">p2=</span><span class="cn">NULL</span>, <span class="at">n2=</span><span class="cn">NULL</span>, p0, <span class="at">alternative =</span> <span class="st">&quot;two.sided&quot;</span>, <span class="at">conf.level=</span><span class="fl">0.95</span>) {</span>
 <span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>  </span>
 <span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>      <span class="cf">if</span> (<span class="fu">is.null</span>(p2)<span class="sc">|</span><span class="fu">is.null</span>(n2)) { </span>
@@ -309,15 +346,15 @@ instead of normal distributions so account for small sample size.</p>
 <span id="cb7-28"><a href="#cb7-28" tabindex="-1"></a>          Z <span class="ot">&lt;-</span> (p2 <span class="sc">-</span> p1 <span class="sc">-</span> p0)<span class="sc">/</span><span class="fu">sqrt</span>(ppool<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>ppool)<span class="sc">*</span>((<span class="dv">1</span><span class="sc">/</span>n1)<span class="sc">+</span>(<span class="dv">1</span><span class="sc">/</span>n2)))</span>
 <span id="cb7-29"><a href="#cb7-29" tabindex="-1"></a>    </span>
 <span id="cb7-30"><a href="#cb7-30" tabindex="-1"></a>          <span class="cf">if</span> (alternative <span class="sc">==</span> <span class="st">&quot;less&quot;</span>) { </span>
-<span id="cb7-31"><a href="#cb7-31" tabindex="-1"></a>            P <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">pt</span>(Z, <span class="at">df =</span> n1 <span class="sc">-</span> <span class="dv">1</span>, <span class="at">lower.tail =</span> <span class="cn">TRUE</span>) <span class="sc">+</span> <span class="fu">pnorm</span>(Z, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb7-31"><a href="#cb7-31" tabindex="-1"></a>            P <span class="ot">&lt;-</span> <span class="fu">pt</span>(Z, <span class="at">df =</span> n1 <span class="sc">-</span> <span class="dv">1</span>, <span class="at">lower.tail =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb7-32"><a href="#cb7-32" tabindex="-1"></a>          }</span>
 <span id="cb7-33"><a href="#cb7-33" tabindex="-1"></a>   </span>
 <span id="cb7-34"><a href="#cb7-34" tabindex="-1"></a>          <span class="cf">if</span> (alternative <span class="sc">==</span> <span class="st">&quot;greater&quot;</span>) { </span>
-<span id="cb7-35"><a href="#cb7-35" tabindex="-1"></a>            P <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">pt</span>(Z, <span class="at">df =</span> n1 <span class="sc">-</span> <span class="dv">1</span>, <span class="at">lower.tail =</span> <span class="cn">TRUE</span>) <span class="sc">+</span> <span class="fu">pnorm</span>(Z, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb7-35"><a href="#cb7-35" tabindex="-1"></a>            P <span class="ot">&lt;-</span> <span class="fu">pt</span>(Z, <span class="at">df =</span> n1 <span class="sc">-</span> <span class="dv">1</span>, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>)</span>
 <span id="cb7-36"><a href="#cb7-36" tabindex="-1"></a>          }</span>
 <span id="cb7-37"><a href="#cb7-37" tabindex="-1"></a>    </span>
 <span id="cb7-38"><a href="#cb7-38" tabindex="-1"></a>          <span class="cf">if</span> (alternative <span class="sc">==</span> <span class="st">&quot;two.sided&quot;</span>) { </span>
-<span id="cb7-39"><a href="#cb7-39" tabindex="-1"></a>            P <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">pt</span>(Z, <span class="at">df =</span> n1 <span class="sc">-</span> <span class="dv">1</span>, <span class="at">lower.tail =</span> <span class="cn">TRUE</span>) <span class="sc">+</span> <span class="fu">pnorm</span>(Z, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb7-39"><a href="#cb7-39" tabindex="-1"></a>            P <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">pt</span>(Z, <span class="at">df =</span> n1 <span class="sc">-</span> <span class="dv">1</span>, <span class="at">lower.tail =</span> <span class="cn">TRUE</span>) <span class="sc">+</span> <span class="fu">pt</span>(Z, <span class="at">df =</span> n1 <span class="sc">-</span> <span class="dv">1</span>, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>)</span>
 <span id="cb7-40"><a href="#cb7-40" tabindex="-1"></a>          }</span>
 <span id="cb7-41"><a href="#cb7-41" tabindex="-1"></a>          lower <span class="ot">&lt;-</span> (p2<span class="sc">-</span>p1) <span class="sc">-</span> <span class="fu">qt</span>(<span class="at">df =</span> n1<span class="dv">-1</span>, <span class="dv">1</span><span class="sc">-</span>((<span class="dv">1</span><span class="sc">-</span>conf.level)<span class="sc">/</span><span class="dv">2</span>)) <span class="sc">*</span> <span class="fu">sqrt</span>((p1<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>p1)<span class="sc">/</span>n1) <span class="sc">+</span> (p2<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>p2)<span class="sc">/</span>n2))</span>
 <span id="cb7-42"><a href="#cb7-42" tabindex="-1"></a>          upper <span class="ot">&lt;-</span> (p2<span class="sc">-</span>p1) <span class="sc">+</span> <span class="fu">qt</span>(<span class="at">df =</span> n1<span class="dv">-1</span>, <span class="dv">1</span><span class="sc">-</span>((<span class="dv">1</span><span class="sc">-</span>conf.level)<span class="sc">/</span><span class="dv">2</span>)) <span class="sc">*</span> <span class="fu">sqrt</span>((p1<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>p1)<span class="sc">/</span>n1) <span class="sc">+</span> (p2<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>p2)<span class="sc">/</span>n2))</span>
@@ -345,7 +382,7 @@ instead of normal distributions so account for small sample size.</p>
 ## [1] 1.719451
 ## 
 ## $`p-value`
-## [1] 0.08994899
+## [1] 0.09436569
 ## 
 ## $`Confidence Interval`
 ## [1] -0.1361547  0.2361547</code></pre>
@@ -353,6 +390,7 @@ instead of normal distributions so account for small sample size.</p>
 given by the t distribution method is higher and the confidence
 intervals are a little broader than those prouced from the normal
 distribution method.</p>
+</div>
 </div>
 <div id="part-2" class="section level1">
 <h1>Part 2</h1>
@@ -441,25 +479,39 @@ longevity~brain size and log(longevity)~log(brain size):</p>
 ## 4 Campbell et al. 2007
 ## 5 Campbell et al. 2007
 ## 6 Campbell et al. 2007</code></pre>
-<div id="fit-the-regression-model-and-using-ggplot2-produce-a-scatterplot-with-the-fitted-line-superimposed-upon-the-data.-append-the-the-fitted-model-equation-to-your-plot-hint-use-the-function-geom_text." class="section level2">
-<h2>Fit the regression model and, using {ggplot2}, produce a scatterplot
+<div id="regression-models-and-plotting" class="section level2">
+<h2>Regression models and plotting</h2>
+<p>Fit the regression model and, using {ggplot2}, produce a scatterplot
 with the fitted line superimposed upon the data. Append the the fitted
-model equation to your plot (HINT: use the function geom_text()).</h2>
+model equation to your plot (HINT: use the function geom_text()).</p>
 <div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
 <span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>longevity <span class="ot">&lt;-</span> data<span class="sc">$</span>MaxLongevity_m</span>
 <span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>log_longevity <span class="ot">&lt;-</span> <span class="fu">log</span>(data<span class="sc">$</span>MaxLongevity_m)</span>
 <span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>brainsize <span class="ot">&lt;-</span> data<span class="sc">$</span>Brain_Size_Species_Mean</span>
 <span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a>log_brainsize <span class="ot">&lt;-</span> <span class="fu">log</span>(data<span class="sc">$</span>Brain_Size_Species_Mean)</span></code></pre></div>
-<p>longevity~brain size</p>
+<div id="longevitybrain-size" class="section level3">
+<h3>longevity~brain size</h3>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>model1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(longevity <span class="sc">~</span> brainsize, <span class="at">data =</span> data)</span>
-<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a>model1</span></code></pre></div>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="fu">summary</span>(model1)</span></code></pre></div>
 <pre><code>## 
 ## Call:
 ## lm(formula = longevity ~ brainsize, data = data)
 ## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -198.27  -61.92  -17.78   56.16  331.36 
+## 
 ## Coefficients:
-## (Intercept)    brainsize  
-##     248.952        1.218</code></pre>
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) 248.9523    11.1111   22.41   &lt;2e-16 ***
+## brainsize     1.2180     0.1101   11.06   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 90.91 on 126 degrees of freedom
+##   (85 observations deleted due to missingness)
+## Multiple R-squared:  0.4928, Adjusted R-squared:  0.4887 
+## F-statistic: 122.4 on 1 and 126 DF,  p-value: &lt; 2.2e-16</code></pre>
 <div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a>plot1 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> data, <span class="fu">aes</span>(<span class="at">x =</span> brainsize, <span class="at">y =</span> longevity)) <span class="sc">+</span> </span>
 <span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
 <span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;lm&quot;</span>, <span class="at">formula =</span> y <span class="sc">~</span> x, <span class="at">color=</span><span class="st">&quot;blue&quot;</span>) <span class="sc">+</span></span>
@@ -467,39 +519,223 @@ model equation to your plot (HINT: use the function geom_text()).</h2>
 <span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a>  <span class="fu">theme_classic</span>()</span>
 <span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a>plot1</span></code></pre></div>
 <p><img src="data:image/png;base64,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" /><!-- --></p>
-<p>log(longevity)~log(brain size)</p>
+</div>
+<div id="loglongevitylogbrain-size" class="section level3">
+<h3>log(longevity)~log(brain size)</h3>
 <div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a>model2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(log_longevity <span class="sc">~</span> log_brainsize, <span class="at">data =</span> data)</span>
-<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a>model2</span></code></pre></div>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a><span class="fu">summary</span>(model2)</span></code></pre></div>
 <pre><code>## 
 ## Call:
 ## lm(formula = log_longevity ~ log_brainsize, data = data)
 ## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -0.6955 -0.1750 -0.0097  0.1788  0.6084 
+## 
 ## Coefficients:
-##   (Intercept)  log_brainsize  
-##        4.8790         0.2341</code></pre>
+##               Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)    4.87895    0.06907   70.63   &lt;2e-16 ***
+## log_brainsize  0.23415    0.01781   13.15   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.2485 on 126 degrees of freedom
+##   (85 observations deleted due to missingness)
+## Multiple R-squared:  0.5784, Adjusted R-squared:  0.5751 
+## F-statistic: 172.9 on 1 and 126 DF,  p-value: &lt; 2.2e-16</code></pre>
 <div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a>plot2 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> data, <span class="fu">aes</span>(<span class="at">x =</span> log_brainsize, <span class="at">y =</span> log_longevity)) <span class="sc">+</span></span>
 <span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
 <span id="cb20-3"><a href="#cb20-3" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;lm&quot;</span>, <span class="at">formula =</span> y <span class="sc">~</span> x, <span class="at">color=</span><span class="st">&quot;blue&quot;</span>) <span class="sc">+</span></span>
-<span id="cb20-4"><a href="#cb20-4" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="at">x=</span><span class="dv">300</span>, <span class="at">y=</span><span class="dv">300</span>, <span class="at">label=</span><span class="st">&quot;y = 0.2341x + 4.8790&quot;</span>, <span class="at">color=</span><span class="st">&quot;blue&quot;</span>) <span class="sc">+</span></span>
+<span id="cb20-4"><a href="#cb20-4" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="at">x=</span><span class="dv">4</span>, <span class="at">y=</span><span class="dv">5</span>, <span class="at">label=</span><span class="st">&quot;y = 0.2341x + 4.8790&quot;</span>, <span class="at">color=</span><span class="st">&quot;blue&quot;</span>) <span class="sc">+</span></span>
 <span id="cb20-5"><a href="#cb20-5" tabindex="-1"></a>  <span class="fu">theme_classic</span>()</span>
 <span id="cb20-6"><a href="#cb20-6" tabindex="-1"></a>plot2</span></code></pre></div>
 <p><img src="baroth_OriginalHomeworkCode_04_files/figure-html/fit%20the%20log%20model-1.png" /><!-- --></p>
-<ul>
-<li><p>Identify and interpret the point estimate of the slope (β1), as
-well as the outcome of the test associated with the hypotheses H0: β1 =
-0; HA: β1 ≠ 0. Also, find a 90 percent CI for the slope (β1)
-parameter.</p></li>
-<li><p>Using your model, add lines for the 90 percent confidence and
+</div>
+</div>
+<div id="slope-testing" class="section level2">
+<h2>Slope testing</h2>
+<p>Identify and interpret the point estimate of the slope (β1), as well
+as the outcome of the test associated with the hypotheses H0: β1 = 0;
+HA: β1 ≠ 0. Also, find a 90 percent CI for the slope (β1) parameter.</p>
+<div id="longevitybrain-size-1" class="section level3">
+<h3>longevity~brain size</h3>
+<p>Coefficients: Estimate Std. Error t value Pr(&gt;|t|)<br />
+(Intercept) 248.9523 11.1111 22.41 &lt;2e-16 <strong><em> brainsize
+1.2180 0.1101 11.06 &lt;2e-16 </em></strong></p>
+<p>The slope (β1) of longevity~brain size is 1.218 meaning that for
+every gram species mean brain size increases, the maximum longevity
+increases by 1.218 months. The p-value of the test that the slope
+differs from 0, &lt;2e-16, is less than 0.05, indicates that the slope
+is not equal to 0.</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a>lower <span class="ot">&lt;-</span> <span class="fl">1.2180</span> <span class="sc">-</span> <span class="fu">qt</span>(<span class="fl">0.95</span>, <span class="at">df =</span> <span class="dv">211</span>) <span class="sc">*</span> <span class="fl">0.1101</span> <span class="co">#213 observations - 2 = 211 df</span></span>
+<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a>upper <span class="ot">&lt;-</span> <span class="fl">1.2180</span> <span class="sc">+</span> <span class="fu">qt</span>(<span class="fl">0.95</span>, <span class="at">df =</span> <span class="dv">211</span>) <span class="sc">*</span> <span class="fl">0.1101</span> <span class="co">#1-.9 confidence - .1 divided between the lower and upper calculations</span></span>
+<span id="cb21-3"><a href="#cb21-3" tabindex="-1"></a>ci <span class="ot">&lt;-</span> <span class="fu">c</span>(lower, upper)</span>
+<span id="cb21-4"><a href="#cb21-4" tabindex="-1"></a>ci</span></code></pre></div>
+<pre><code>## [1] 1.036103 1.399897</code></pre>
+<p>With 90% confidence, we can say that the actual slope of the
+relationship is between 1.036103 and 1.399897.</p>
+</div>
+<div id="loglongevitylogbrain-size-1" class="section level3">
+<h3>log(longevity)~log(brain size)</h3>
+<p>Coefficients (log): Estimate Std. Error t value Pr(&gt;|t|)<br />
+(Intercept) 4.87895 0.06907 70.63 &lt;2e-16 <strong><em> log_brainsize
+0.23415 0.01781 13.15 &lt;2e-16 </em></strong></p>
+<p>The slope (β1) of log(longevity)~log(brain size) is 0.2341 meaning
+that for every unit increase in the logarithm of species mean brain size
+increases, the logarithm of maximum longevity increases by 1.218 units.
+The p-value of the test that the slope differs from 0, &lt;2e-16, is
+less than 0.05, indicates that the slope is not equal to 0.</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a>lower <span class="ot">&lt;-</span> <span class="fl">0.23415</span> <span class="sc">-</span> <span class="fu">qt</span>(<span class="fl">0.95</span>, <span class="at">df =</span> <span class="dv">211</span>) <span class="sc">*</span> <span class="fl">0.01781</span></span>
+<span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a>upper <span class="ot">&lt;-</span> <span class="fl">0.23415</span> <span class="sc">+</span> <span class="fu">qt</span>(<span class="fl">0.95</span>, <span class="at">df =</span> <span class="dv">211</span>) <span class="sc">*</span> <span class="fl">0.01781</span></span>
+<span id="cb23-3"><a href="#cb23-3" tabindex="-1"></a>ci <span class="ot">&lt;-</span> <span class="fu">c</span>(lower, upper)</span>
+<span id="cb23-4"><a href="#cb23-4" tabindex="-1"></a>ci</span></code></pre></div>
+<pre><code>## [1] 0.204726 0.263574</code></pre>
+<p>With 90% confidence, we can say that the actual slope of the
+relationship is between 0.204726 and 0.263574.</p>
+</div>
+</div>
+<div id="confidence-intervals-and-prediction-intervals" class="section level2">
+<h2>Confidence intervals and prediction intervals</h2>
+<p>Using your model, add lines for the 90 percent confidence and
 prediction interval bands on the plot and add a legend to differentiate
-between the lines.</p></li>
-<li><p>Produce a point estimate and associated 90 percent PI for the
+between the lines.</p>
+<div id="longevitybrain-size-2" class="section level3">
+<h3>longevity~brain size</h3>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a>ci1 <span class="ot">&lt;-</span> <span class="fu">predict</span>(model1, <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">brainsize =</span> data<span class="sc">$</span>Brain_Size_Species_Mean), <span class="at">interval =</span> <span class="st">&quot;confidence&quot;</span>, <span class="at">level =</span> <span class="fl">0.90</span>)  <span class="co"># to calculate confidence intervals for a vector of values</span></span>
+<span id="cb25-2"><a href="#cb25-2" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" tabindex="-1"></a>pi1 <span class="ot">&lt;-</span> <span class="fu">predict</span>(model1, <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">brainsize =</span> data<span class="sc">$</span>Brain_Size_Species_Mean), <span class="at">interval =</span> <span class="st">&quot;prediction&quot;</span>, <span class="at">level =</span> <span class="fl">0.90</span>)  <span class="co"># to calculate prediction intervals for a vector of values</span></span>
+<span id="cb25-4"><a href="#cb25-4" tabindex="-1"></a></span>
+<span id="cb25-5"><a href="#cb25-5" tabindex="-1"></a>df1 <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">cbind</span>(brainsize ,longevity, ci1, pi1)) <span class="co">#make a data frame of the x and y values and the newly calculated confidence intervals</span></span>
+<span id="cb25-6"><a href="#cb25-6" tabindex="-1"></a><span class="fu">names</span>(df1) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;brainsize&quot;</span>, <span class="st">&quot;longevity&quot;</span>, <span class="st">&quot;CIfit&quot;</span>, <span class="st">&quot;CIlwr&quot;</span>, <span class="st">&quot;CIupr&quot;</span>, <span class="st">&quot;PIfit&quot;</span>, <span class="st">&quot;PIlwr&quot;</span>,</span>
+<span id="cb25-7"><a href="#cb25-7" tabindex="-1"></a>    <span class="st">&quot;PIupr&quot;</span>)</span>
+<span id="cb25-8"><a href="#cb25-8" tabindex="-1"></a><span class="fu">head</span>(df1)</span></code></pre></div>
+<pre><code>##   brainsize longevity    CIfit    CIlwr    CIupr    PIfit    PIlwr    PIupr
+## 1     58.02     276.0 319.6201 306.1354 333.1047 319.6201 168.3750 470.8651
+## 2        NA        NA       NA       NA       NA       NA       NA       NA
+## 3     52.84        NA 313.3109 299.6449 326.9768 313.3109 162.0496 464.5722
+## 4     52.63     243.6 313.0551 299.3805 326.7297 313.0551 161.7930 464.3172
+## 5     51.70        NA 311.9224 298.2081 325.6366 311.9224 160.6567 463.1880
+## 6     49.88     300.0 309.7056 295.9081 323.5032 309.7056 158.4324 460.9789</code></pre>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" tabindex="-1"></a>plot1 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> df1, <span class="fu">aes</span>(<span class="at">x =</span> brainsize, <span class="at">y =</span> longevity)) <span class="sc">+</span> </span>
+<span id="cb27-2"><a href="#cb27-2" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb27-3"><a href="#cb27-3" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="at">x=</span><span class="dv">300</span>, <span class="at">y=</span><span class="dv">300</span>, <span class="at">label=</span><span class="st">&quot;y = 1.218x + 248.952&quot;</span>) <span class="sc">+</span></span>
+<span id="cb27-4"><a href="#cb27-4" tabindex="-1"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb27-5"><a href="#cb27-5" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> brainsize, <span class="at">y =</span> CIfit, <span class="at">color=</span><span class="st">&quot;Model&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb27-6"><a href="#cb27-6" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> brainsize, <span class="at">y =</span> CIlwr, <span class="at">color=</span><span class="st">&quot;CI&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb27-7"><a href="#cb27-7" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> brainsize, <span class="at">y =</span> CIupr, <span class="at">color=</span><span class="st">&quot;CI&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb27-8"><a href="#cb27-8" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> brainsize, <span class="at">y =</span> PIlwr, <span class="at">color=</span><span class="st">&quot;PI&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb27-9"><a href="#cb27-9" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> brainsize, <span class="at">y =</span> PIupr, <span class="at">color=</span><span class="st">&quot;PI&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb27-10"><a href="#cb27-10" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.title=</span><span class="fu">element_blank</span>())</span>
+<span id="cb27-11"><a href="#cb27-11" tabindex="-1"></a>plot1</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+</div>
+<div id="loglongevitylogbrain-size-2" class="section level3">
+<h3>log(longevity)~log(brain size)</h3>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" tabindex="-1"></a>ci2 <span class="ot">&lt;-</span> <span class="fu">predict</span>(model2, <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">log_longevity =</span> <span class="fu">log</span>(data<span class="sc">$</span>MaxLongevity_m)), <span class="at">interval =</span> <span class="st">&quot;confidence&quot;</span>, <span class="at">level =</span> <span class="fl">0.90</span>)  <span class="co"># to calculate confidence intervals for a vector of values</span></span>
+<span id="cb28-2"><a href="#cb28-2" tabindex="-1"></a>pi2 <span class="ot">&lt;-</span> <span class="fu">predict</span>(model2, <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">log_brainsize =</span> <span class="fu">log</span>(data<span class="sc">$</span>Brain_Size_Species_Mean)), <span class="at">interval =</span> <span class="st">&quot;prediction&quot;</span>, <span class="at">level =</span> <span class="fl">0.90</span>)  <span class="co"># to calculate prediction intervals for a vector of values</span></span>
+<span id="cb28-3"><a href="#cb28-3" tabindex="-1"></a></span>
+<span id="cb28-4"><a href="#cb28-4" tabindex="-1"></a>df2 <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">cbind</span>(log_brainsize, log_longevity, ci2, pi2)) <span class="co">#make a data frame of the x and y values and the newly calculated confidence intervals</span></span>
+<span id="cb28-5"><a href="#cb28-5" tabindex="-1"></a><span class="fu">names</span>(df2) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;log_brainsize&quot;</span>, <span class="st">&quot;log_longevity&quot;</span>, <span class="st">&quot;CIfit&quot;</span>, <span class="st">&quot;CIlwr&quot;</span>, <span class="st">&quot;CIupr&quot;</span>, <span class="st">&quot;PIfit&quot;</span>, <span class="st">&quot;PIlwr&quot;</span>, <span class="st">&quot;PIupr&quot;</span>)</span>
+<span id="cb28-6"><a href="#cb28-6" tabindex="-1"></a><span class="fu">head</span>(df2)</span></code></pre></div>
+<pre><code>##   log_brainsize log_longevity    CIfit    CIlwr    CIupr    PIfit    PIlwr
+## 1      4.060788      5.620401 5.829783 5.791675 5.867891 5.829783 5.416322
+## 2            NA            NA       NA       NA       NA       NA       NA
+## 3      3.967268            NA 5.807885 5.770504 5.845267 5.807885 5.394491
+## 4      3.963286      5.495528 5.806953 5.769598 5.844308 5.806953 5.393561
+## 5      3.945458            NA 5.802778 5.765539 5.840018 5.802778 5.389397
+## 6      3.909620      5.703782 5.794387 5.757357 5.831416 5.794387 5.381024
+##      PIupr
+## 1 6.243243
+## 2       NA
+## 3 6.221279
+## 4 6.220344
+## 5 6.216159
+## 6 6.207749</code></pre>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" tabindex="-1"></a>plot2 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> df2, <span class="fu">aes</span>(<span class="at">x =</span> log_brainsize, <span class="at">y =</span> log_longevity)) <span class="sc">+</span> </span>
+<span id="cb30-2"><a href="#cb30-2" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb30-3"><a href="#cb30-3" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="at">x=</span><span class="dv">300</span>, <span class="at">y=</span><span class="dv">300</span>, <span class="at">label=</span><span class="st">&quot;y = 0.2341x + 4.8790&quot;</span>) <span class="sc">+</span></span>
+<span id="cb30-4"><a href="#cb30-4" tabindex="-1"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb30-5"><a href="#cb30-5" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> log_brainsize, <span class="at">y =</span> CIfit, <span class="at">color=</span><span class="st">&quot;Model&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb30-6"><a href="#cb30-6" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> log_brainsize, <span class="at">y =</span> CIlwr, <span class="at">color=</span><span class="st">&quot;CI&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb30-7"><a href="#cb30-7" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> log_brainsize, <span class="at">y =</span> CIupr, <span class="at">color=</span><span class="st">&quot;CI&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb30-8"><a href="#cb30-8" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> log_brainsize, <span class="at">y =</span> PIlwr, <span class="at">color=</span><span class="st">&quot;PI&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb30-9"><a href="#cb30-9" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> log_brainsize, <span class="at">y =</span> PIupr, <span class="at">color=</span><span class="st">&quot;PI&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb30-10"><a href="#cb30-10" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.title=</span><span class="fu">element_blank</span>())</span>
+<span id="cb30-11"><a href="#cb30-11" tabindex="-1"></a>plot2</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+</div>
+</div>
+<div id="prediction" class="section level2">
+<h2>Prediction</h2>
+<p>Produce a point estimate and associated 90 percent PI for the
 longevity of a species whose brain weight is 800 gm. Do you trust the
 model to predict observations accurately for this value of the
-explanatory variable? Why or why not?</p></li>
-<li><p>Looking at your two models, which do you think is better?
-Why?</p></li>
-</ul>
+explanatory variable? Why or why not?</p>
+<div id="longevitybrain-size-3" class="section level3">
+<h3>longevity~brain size</h3>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" tabindex="-1"></a>longevity800 <span class="ot">&lt;-</span> <span class="fl">1.218</span><span class="sc">*</span>(<span class="dv">800</span>) <span class="sc">+</span> <span class="fl">248.952</span></span>
+<span id="cb31-2"><a href="#cb31-2" tabindex="-1"></a>longevity800</span></code></pre></div>
+<pre><code>## [1] 1223.352</code></pre>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" tabindex="-1"></a>pi800 <span class="ot">&lt;-</span> <span class="fu">predict</span>(model1, <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">brainsize =</span> <span class="dv">800</span>), <span class="at">interval =</span> <span class="st">&quot;prediction&quot;</span>, <span class="at">level =</span> <span class="fl">0.90</span>)</span>
+<span id="cb33-2"><a href="#cb33-2" tabindex="-1"></a>pi800</span></code></pre></div>
+<pre><code>##        fit      lwr      upr
+## 1 1223.345 1021.805 1424.884</code></pre>
+<p>The predicted longevity is 1223.352 months (~101 years) with a
+prediction interval of 1021.805 to 1424.884. I do not think the model
+can predict very accurately for an 800g average brain size because this
+is pretty far from most of the data. Most species have a brain size
+below 200g.</p>
 </div>
+<div id="loglongevitylogbrain-size-3" class="section level3">
+<h3>log(longevity)~log(brain size)</h3>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" tabindex="-1"></a><span class="fu">log</span>(<span class="dv">800</span>)</span></code></pre></div>
+<pre><code>## [1] 6.684612</code></pre>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" tabindex="-1"></a>log_longevity800 <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="fl">0.2341</span> <span class="sc">*</span> <span class="fu">log</span>(<span class="dv">800</span>) <span class="sc">+</span> <span class="fl">4.8790</span>)</span>
+<span id="cb37-2"><a href="#cb37-2" tabindex="-1"></a>log_longevity800</span></code></pre></div>
+<pre><code>## [1] 628.8342</code></pre>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" tabindex="-1"></a>log_pi800 <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="fu">predict</span>(model2, <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">log_brainsize =</span> <span class="fu">log</span>(<span class="dv">800</span>)), <span class="at">interval =</span> <span class="st">&quot;prediction&quot;</span>, <span class="at">level =</span> <span class="fl">0.90</span>))</span>
+<span id="cb39-2"><a href="#cb39-2" tabindex="-1"></a>log_pi800</span></code></pre></div>
+<pre><code>##        fit      lwr      upr
+## 1 629.0118 412.1652 959.9446</code></pre>
+<p>The predicted longevity is 628.8342 months (~52 years) with a
+prediction interval of 412.1652 to 959.9446. I think this model gives a
+more accurate prediction for an 800g average brain size than the
+untransformed model because log(800)=6.684612 is closer the spread of
+the data. Also the confidence intervals for the model are tighter,
+suggesting that the log model is a better fit for the data than the
+untransformed model.</p>
+</div>
+</div>
+<div id="model-comparison" class="section level2">
+<h2>Model Comparison</h2>
+<p>Looking at your two models, which do you think is better? Why?</p>
+<p>I think the log model is more appropriate for for this data. The F
+statistic for this model is 172.9 which is higher than the F statistic
+for the untransformed model which is 122.4. I’m not sure, but I think
+this means that the residuals are relatively smaller for the log model
+than the untransformed model and therefore the linear model fits the
+data more closely. The F statistic is a better comparison than the
+r-squared value because it is a formal test of whether the models differ
+from there being no relationship.</p>
+</div>
+</div>
+<div id="challenges-i-faced" class="section level1">
+<h1>Challenges I Faced</h1>
+<ol style="list-style-type: decimal">
+<li>I was having a hard time figuring out what was wrong with my
+function when it seemed to run without an error but only produced 0s in
+the output. I realized that I needed the else(){} function to complement
+the first if(){} so that it would know what to do if the conditions of
+the if where not met. Understanding syntax in general was a
+challenge.</li>
+<li>I am still unsure if I have set the function to correctly calculate
+confidence interval or follow the rule of thumb to produce a warning for
+the two sample tests.</li>
+<li>It took me a while to figure out how to add a legend to the
+scatterplots because I had set the color of each line manually. When I
+figured out that I could set the color to a character variable, I
+learned that ggplot would produce a legend automatically.</li>
+</ol>
 </div>
 </div>
 </div>
