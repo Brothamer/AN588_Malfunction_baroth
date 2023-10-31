@@ -1,0 +1,356 @@
+---
+title: "BUlogin_FinalHomeworkCode_04"
+author: "Brooke Rothamer"
+date: "`r Sys.Date()`"
+output:
+  prettydoc::html_pretty:
+    theme: "tactile"
+    toc: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Part 1
+Write a simple R function, Z.prop.test(), that can perform one- or two-sample Z-tests for **proportion data**, using the following guidelines:
+
+* Your function should take the following arguments: p1 and n1 (no default) representing the estimated proportion and sample size (i.e., based on your sample data); p2 and n2 (both defaulting to NULL) that contain a second sample’s proportion and sample size data in the event of a two-sample test; p0 (no default) as the expected value for the population proportion; and alternative (default “two.sided”) and conf.level (default 0.95), to be used in the same way as in the function t.test().
+* When conducting a two-sample test, it should be p1 that is tested as being smaller or larger than p2 when alternative=“less” or alternative=“greater”, the same as in the use of x and y in the function t.test().
+* The function should perform a one-sample Z-test using p1, n1, and p0 if either p2 or n2 (or both) is NULL.
+* The function should contain a check for the rules of thumb we have talked about (n∗p>5 and n∗(1−p)>5) to ensure the validity of assuming the normal distribution in both the one- and two-sample settings. If this is violated, the function should still complete but it should also print an appropriate warning message.
+* The function should return a list containing the members Z (the test statistic), P (the appropriate p value), and CI (the two-sided CI with respect to “conf.level” around p1 in the case of a one-sample test and around p2-p1 in the case of a two-sample test). For all test alternatives (“two.sided”, “greater”, “less”), calculate symmetric CIs based on quantiles of the normal distribution rather than worrying about calculating single-limit confidence bounds.
+
+## Z.prop.test
+```{r function using normal distribution}
+
+Z.prop.test <- function(p1, n1, p2=NULL, n2=NULL, p0, alternative = "two.sided", conf.level=0.95) {
+  
+      if (is.null(p2)|is.null(n2)) { 
+        #One Sample: this option will only run if p2 or n2 (or both) are NULL
+            Z <- (p1 - p0)/(sqrt(p0*(1 - p0)/n1))
+          if (alternative == "less") { #This option will run a one-tailed test to see if p1 is less than p2
+          P <- pnorm(Z, lower.tail = TRUE) 
+          }
+          if (alternative == "greater") { #This option will run a one-tailed test to see if p1 is greater than p2
+          P <- pnorm(Z, lower.tail = FALSE)
+          }
+          if (alternative == "two.sided") { #This option will run a two-tailed test (default) to see if p1 differs from p2
+            if (Z > 0) #if Z is greater than 0, we need to look at the probability above the Z score
+                {
+                  P <- 2 * pnorm(Z, lower.tail = FALSE) #multiple by 2 to account for probability of being above or below the expected proportion
+                }
+            if (Z < 0) #if Z is greater than 0, we need to look at the probability up to (below) the Z score
+                {
+                  P <- 2 * pnorm(Z, lower.tail = TRUE) #times 2 because its 2-tailed
+                }
+            }
+          lower <- p1 - qnorm(1-((1-conf.level)/2)) * sqrt(p1 * (1 - p1)/n1) #1-((1-conf.level)/2) because half the confidence interval is above
+          upper <- p1 + qnorm(1-((1-conf.level)/2)) * sqrt(p1 * (1 - p1)/n1) #and half is below
+          CI <- c(lower, upper)
+          CI
+          if (n1*p0 <= 5 | n1*(1-p0) <= 5) 
+            {print("Warning: Test may violate the assumptions of the normal distribution. n is not sufficiently large or p0 is close to 1 or 0.")} 
+          #prints a warning message is the assumptions of a normal distribution are not met
+        }
+  
+      else{ 
+        # Two Sample: this option will run if p2 and n2 are provided
+          ppool <- ((p1+p2)/(n1+n2)) #calculate pooled proportion of the two samples for use in calculating z score
+          Z <- (p2 - p1 - p0)/sqrt(ppool*(1-ppool)*((1/n1)+(1/n2)))
+    
+          if (alternative == "less") { #This option will run a one-tailed test to see if p2-p1 is less than 0
+            P <- pnorm(z, lower.tail = TRUE)
+          }
+   
+          if (alternative == "greater") { #This option will run a one-tailed test to see if p2-p1 is greater than 0
+            P <- pnorm(Z, lower.tail = FALSE)
+          }
+    
+          if (alternative == "two.sided") { #This option will run a two-tailed test (default) to see if p2-p1 differs from 0
+            P <- 1 - pnorm(Z, lower.tail = TRUE) + pnorm(Z, lower.tail = FALSE)
+          }
+          lower <- (p2-p1) - qnorm(1-((1-conf.level)/2)) * sqrt((p1*(1-p1)/n1) + (p2*(1-p2)/n2)) #I am not entirely sure I calculated SE correctly for a two sample test
+          upper <- (p2-p1) + qnorm(1-((1-conf.level)/2)) * sqrt((p1*(1-p1)/n1) + (p2*(1-p2)/n2))
+          CI <- c(lower, upper)
+          CI
+          if (n1*p1 <= 5 | n1*(1-p1) <= 5 | n2*p2 <= 5 | n2*(1-p2) <= 5) 
+            {print("Warning: Test may violate the assumptions of the normal distribution. n is not sufficiently large or p is close to 1 or 0.")} 
+          #I'm not sure I've expressed the rule correctly here
+      }
+      
+    return_list <- list(Z, P, CI) # make a list of the items the function should return
+    names(return_list) <- c("Z statistic", "p-value", "Confidence Interval") # labels items in the output
+    return(return_list) #tell the function to return that list
+    }
+```
+
+Does it work on these samples?
+```{r does it work}
+#A Single Sample test of the function
+Z.prop.test(p1=0.5, n1=36, p0=0.9, alternative = "two.sided", conf.level=0.95)
+```
+```{r does it work 2}
+#A Two Sample test of the function
+Z.prop.test(p1=0.75, n1=36, p2=0.8, n2=50, p0=0, alternative = "two.sided", conf.level=0.95)
+```
+
+## Z.prop.test.t (using a t distribution)
+An attempt at a version of the same function using t-distributions of Z scores instead of normal distributions to account for small sample size.
+
+```{r function using t distribution}
+
+Z.prop.test.t <- function(p1, n1, p2=NULL, n2=NULL, p0, alternative = "two.sided", conf.level=0.95) {
+  
+      if (is.null(p2)|is.null(n2)) { 
+            Z <- (p1 - p0)/(sqrt(p0*(1 - p0)/n1))
+          if (alternative == "less") { 
+          P <- pt(Z, df = n1 - 1, lower.tail = TRUE) #using the t-distribution, pt(), not normal distribution, pnorm(), because its better for small sample sizes
+          }
+          if (alternative == "greater") { 
+          P <- pt(Z, df = n1 - 1, lower.tail = FALSE)
+          }
+          if (alternative == "two.sided") { 
+            if (Z > 0) 
+                {
+                  P <- 2 * pt(Z, df = n1 - 1, lower.tail = FALSE) 
+                }
+            if (Z < 0) 
+                {
+                  P <- 2 * pt(Z, df = n1 - 1, lower.tail = TRUE)
+                }
+            }
+          lower <- p1 - qt(df = n1-1, 1-((1-conf.level)/2)) * sqrt(p1 * (1 - p1)/n1) 
+          upper <- p1 + qt(df = n1-1, 1-((1-conf.level)/2)) * sqrt(p1 * (1 - p1)/n1) 
+          CI <- c(lower, upper)
+          CI
+          }
+      else{ 
+          ppool <- ((p1+p2)/(n1+n2))
+          Z <- (p2 - p1 - p0)/sqrt(ppool*(1-ppool)*((1/n1)+(1/n2)))
+    
+          if (alternative == "less") { 
+            P <- pt(Z, df = n1 - 1, lower.tail = TRUE)
+          }
+   
+          if (alternative == "greater") { 
+            P <- pt(Z, df = n1 - 1, lower.tail = FALSE)
+          }
+    
+          if (alternative == "two.sided") { 
+            P <- 1 - pt(Z, df = n1 - 1, lower.tail = TRUE) + pt(Z, df = n1 - 1, lower.tail = FALSE)
+          }
+          lower <- (p2-p1) - qt(df = n1-1, 1-((1-conf.level)/2)) * sqrt((p1*(1-p1)/n1) + (p2*(1-p2)/n2))
+          upper <- (p2-p1) + qt(df = n1-1, 1-((1-conf.level)/2)) * sqrt((p1*(1-p1)/n1) + (p2*(1-p2)/n2))
+          CI <- c(lower, upper)
+          CI
+      }
+    return_list <- list(Z, P, CI) 
+    names(return_list) <- c("Z statistic", "p-value", "Confidence Interval")  
+    return(return_list) 
+    }
+```
+
+Does it work on those same samples?
+```{r does it work 3}
+#A Single Sample test of the function
+Z.prop.test.t(p1=0.5, n1=36, p0=0.9, alternative = "two.sided", conf.level=0.95)
+```
+```{r does it work 4}
+#A Two Sample test of the function
+Z.prop.test.t(p1=0.75, n1=36, p2=0.8, n2=50, p0=0, alternative = "two.sided", conf.level=0.95)
+```
+Yes it does, and it gives very similar results except the p value given by the t distribution method is higher and the confidence intervals are a little broader than those produced from the normal distribution method.
+
+
+# Part 2
+The dataset from Kamilar and Cooper has in it a large number of variables related to life history and body size. For this exercise, the end aim is to fit a simple linear regression model to predict longevity (MaxLongevity_m) measured in months from species’ brain size (Brain_Size_Species_Mean) measured in grams. Do the following for both longevity~brain size and log(longevity)~log(brain size):
+
+```{r load in data}
+data <- read.csv("https://raw.githubusercontent.com/fuzzyatelin/fuzzyatelin.github.io/master/AN588_Fall23/KamilarAndCooperData.csv")
+head(data)
+```
+
+## Regression models and plotting
+
+Fit the regression model and, using {ggplot2}, produce a scatterplot with the fitted line superimposed upon the data. Append the the fitted model equation to your plot (HINT: use the function geom_text()).
+
+```{r preparation, warning=FALSE}
+library(ggplot2)
+longevity <- data$MaxLongevity_m
+log_longevity <- log(data$MaxLongevity_m)
+brainsize <- data$Brain_Size_Species_Mean
+log_brainsize <- log(data$Brain_Size_Species_Mean)
+```
+
+### longevity~brain size
+
+```{r fit the model, warning=FALSE}
+model1 <- lm(longevity ~ brainsize, data = data)
+summary(model1)
+
+plot1 <- ggplot(data = data, aes(x = brainsize, y = longevity)) + 
+  geom_point() +
+  geom_smooth(method = "lm", formula = y ~ x, color="blue") +
+  geom_text(x=300, y=300, label="y = 1.218x + 248.952", color="blue") +
+  theme_classic()
+plot1
+```
+
+### log(longevity)~log(brain size)
+
+```{r fit the  log model, warning=FALSE}
+model2 <- lm(log_longevity ~ log_brainsize, data = data)
+summary(model2)
+
+plot2 <- ggplot(data = data, aes(x = log_brainsize, y = log_longevity)) +
+  geom_point() +
+  geom_smooth(method = "lm", formula = y ~ x, color="blue") +
+  geom_text(x=4, y=5, label="y = 0.2341x + 4.8790", color="blue") +
+  theme_classic()
+```
+```{r, warning=FALSE}
+plot2
+```
+
+## Slope testing
+
+Identify and interpret the point estimate of the slope (β1), as well as the outcome of the test associated with the hypotheses H0: β1 = 0; HA: β1 ≠ 0. Also, find a 90 percent CI for the slope (β1) parameter.
+
+### longevity~brain size
+
+From the summary(model1) coefficients table above, the slope (β1) of longevity~brain size is 1.218 meaning that for every gram species mean brain size increases, the maximum longevity increases by 1.218 months. The p-value of the test that the slope differs from 0, <2e-16, is less than 0.05, indicates that the slope is not equal to 0.
+
+```{r store slope and intercept}
+model1_slope <- summary(model1)$coefficients["brainsize",]["Estimate"]
+model1_intercept <- summary(model1)$coefficients["(Intercept)",]["Estimate"]
+model1_slope_SE <- summary(model1)$coefficients["brainsize",]["Std. Error"]
+```
+
+```{r confidence interval}
+lower <- model1_slope - qt(0.95, df = 211) * model1_slope_SE #213 observations - 2 = 211 df
+upper <- model1_slope + qt(0.95, df = 211) * model1_slope_SE #1-.9 confidence - .1 divided between the lower and upper calculations
+ci <- c(lower, upper)
+ci
+```
+
+With 90% confidence, we can say that the actual slope of the relationship is between 1.036103 and 1.399897.
+
+### log(longevity)~log(brain size)
+
+From the summary(model1) coefficients table above, the slope (β1) of log(longevity)~log(brain size) is 0.2341 meaning that for every unit increase in the logarithm of species mean brain size increases, the logarithm of maximum longevity increases by 1.218 units. The p-value of the test that the slope differs from 0, <2e-16, is less than 0.05, indicates that the slope is not equal to 0.
+
+```{r store slope and intercept log}
+model2_slope <- summary(model2)$coefficients["log_brainsize",]["Estimate"]
+model2_intercept <- summary(model2)$coefficients["(Intercept)",]["Estimate"]
+model2_slope_SE <- summary(model2)$coefficients["log_brainsize",]["Std. Error"]
+```
+
+```{r confidence interval log}
+lower <- model2_slope - qt(0.95, df = 211) * model2_slope_SE
+upper <- model2_slope + qt(0.95, df = 211) * model2_slope_SE
+ci <- c(lower, upper)
+ci
+```
+With 90% confidence, we can say that the actual slope of the relationship is between 0.204726 and 0.263574.
+
+## Confidence intervals and prediction intervals
+
+Using your model, add lines for the 90 percent confidence and prediction interval bands on the plot and add a legend to differentiate between the lines.
+
+### longevity~brain size
+```{r confidence intervals}
+ci1 <- predict(model1, newdata = data.frame(brainsize = data$Brain_Size_Species_Mean), interval = "confidence", level = 0.90)  # to calculate confidence intervals for a vector of values
+
+pi1 <- predict(model1, newdata = data.frame(brainsize = data$Brain_Size_Species_Mean), interval = "prediction", level = 0.90)  # to calculate prediction intervals for a vector of values
+
+df1 <- as.data.frame(cbind(brainsize ,longevity, ci1, pi1)) #make a data frame of the x and y values and the newly calculated confidence intervals
+names(df1) <- c("brainsize", "longevity", "CIfit", "CIlwr", "CIupr", "PIfit", "PIlwr",
+    "PIupr")
+head(df1)
+```
+
+```{r confidence and prediction bands, warning=FALSE}
+plot1 <- ggplot(data = df1, aes(x = brainsize, y = longevity)) + 
+  geom_point() +
+  geom_text(x=300, y=300, label="y = 1.218x + 248.952") +
+  theme_classic() +
+  geom_line(aes(x = brainsize, y = CIfit, color="Model")) +
+  geom_line(aes(x = brainsize, y = CIlwr, color="CI")) +
+  geom_line(aes(x = brainsize, y = CIupr, color="CI")) +
+  geom_line(aes(x = brainsize, y = PIlwr, color="PI")) +
+  geom_line(aes(x = brainsize, y = PIupr, color="PI")) +
+  theme(legend.title=element_blank())
+plot1
+```
+
+### log(longevity)~log(brain size)
+```{r confidence intervals log}
+ci2 <- predict(model2, newdata = data.frame(log_longevity = log(data$MaxLongevity_m)), interval = "confidence", level = 0.90)  # to calculate confidence intervals for a vector of values
+pi2 <- predict(model2, newdata = data.frame(log_brainsize = log(data$Brain_Size_Species_Mean)), interval = "prediction", level = 0.90)  # to calculate prediction intervals for a vector of values
+
+df2 <- as.data.frame(cbind(log_brainsize, log_longevity, ci2, pi2)) #make a data frame of the x and y values and the newly calculated confidence intervals
+names(df2) <- c("log_brainsize", "log_longevity", "CIfit", "CIlwr", "CIupr", "PIfit", "PIlwr", "PIupr")
+head(df2)
+```
+
+```{r confidence and prediction bands log, warning=FALSE}
+plot2 <- ggplot(data = df2, aes(x = log_brainsize, y = log_longevity)) + 
+  geom_point() +
+  geom_text(x=300, y=300, label="y = 0.2341x + 4.8790") +
+  theme_classic() +
+  geom_line(aes(x = log_brainsize, y = CIfit, color="Model")) +
+  geom_line(aes(x = log_brainsize, y = CIlwr, color="CI")) +
+  geom_line(aes(x = log_brainsize, y = CIupr, color="CI")) +
+  geom_line(aes(x = log_brainsize, y = PIlwr, color="PI")) +
+  geom_line(aes(x = log_brainsize, y = PIupr, color="PI")) +
+  theme(legend.title=element_blank())
+```
+
+```{r, warning=FALSE}
+plot2
+```
+
+
+## Prediction
+Produce a point estimate and associated 90 percent PI for the longevity of a species whose brain weight is 800 gm. Do you trust the model to predict observations accurately for this value of the explanatory variable? Why or why not?
+
+### longevity~brain size
+```{r predict 800gm}
+longevity800 <- model1_slope*(800) + model1_intercept # technically, this step isn't necessary as the predict() function also produces the point estimate, but this is the math that goes into that
+longevity800 
+
+pi800 <- predict(model1, newdata = data.frame(brainsize = 800), interval = "prediction", level = 0.90)
+pi800 # fit is the point estimate and lwr and upr are the lower and upper prediction intervals
+```
+The predicted longevity is 1223.352 months (~101 years) with a prediction interval of 1021.805 to 1424.884. I do not think the model can predict very accurately for an 800g average brain size because this is pretty far from most of the data. Most species have a brain size below 200g.
+
+### log(longevity)~log(brain size)
+```{r predict 800gm log}
+log(800) # not necessary, just curious to know what the log of 800 is so I can visualize where this point is in the plot
+log_longevity800 <- exp(model2_slope * log(800) + model2_intercept) # technically, this step isn't necessary as the predict() function also produces the point estimate, but this is the math that goes into that
+log_longevity800
+
+log_pi800 <- exp(predict(model2, newdata = data.frame(log_brainsize = log(800)), interval = "prediction", level = 0.90)) # fit is the point estimate and lwr and upr are the lower and upper prediction intervals
+log_pi800
+```
+The predicted longevity is 628.8342 months (~52 years) with a prediction interval of 412.1652 to 959.9446. I think this model gives a more accurate prediction for an 800g average brain size than the untransformed model because log(800)=6.684612 is closer the spread of the data. Also the confidence intervals for the model are tighter, suggesting that the log model is a better fit for the data than the untransformed model.
+
+## Model Comparison
+Looking at your two models, which do you think is better? Why?
+
+I think the log model is more appropriate for for this data. The F statistic for this model is 172.9 which is higher than the F statistic for the untransformed model which is 122.4. I'm not sure, but I think this means that the residuals are relatively smaller for the log model than the untransformed model and therefore the linear model fits the data more closely. The F statistic is a better comparison than the r-squared value because it is a formal test of whether the models differ from there being no relationship.
+
+# Challenges I Faced
+1. I was having a hard time figuring out what was wrong with my function when it seemed to run without an error but only produced 0s in the output. I realized that I needed the else(){} function to complement the first if(){} so  that it would know what to do if the conditions of the if where not met. Understanding syntax in general was a challenge.
+2. I am still unsure if I have set the function to correctly calculate confidence interval or follow the rule of thumb to produce a warning for the two sample tests.
+3. It took me a while to figure out how to add a legend to the scatterplots because I had set the color of each line manually. When I figured out that I could set the color to a character variable, I learned that ggplot would produce a legend automatically.
+
+# What I liked about my peer's code
+1. I noticed that Ritika has the date in her YAML set to the system date. I had forgotten that that was possible, and now I will set up my r markdowns like that.
+2. I like that Ritika created object that contained her regression model formulas using the values as indexed from the model summary so that she could use that formula as a label on her plots. I just typed in my labels manually.
+
+# What I learned
+1. Based on Ritika's advice, I learned that it is useful to index the point estimates and other values from the model summaries that I will use in later analyses. That way, it is clear where the values come from and I do not have to go back and look to see what the value is every time I need to use it. 
+2. I learned that my function should print the warning if n * po or n * (1-po) is less than or equal to 5 rather than just less than.
+3. Through this whole assignment, I got a lot more familiar with writing functions and what I could have a function do. Specifically, I learned how to format if(){} else(){} commands and multi-part outputs.
